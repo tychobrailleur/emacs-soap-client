@@ -2324,10 +2324,12 @@ traverse an element tree."
 
 (defun soap-parse-server-response ()
   "Error-check and parse the XML contents of the current buffer."
-  (let ((mime-part (mm-dissect-buffer t t)))
+  (let* ((mime-part (mm-dissect-buffer t t))
+         (content-type (car (mm-handle-type mime-part))))
     (unless mime-part
       (error "Failed to decode response from server"))
-    (unless (equal (car (mm-handle-type mime-part)) "text/xml")
+    (unless (or (equal content-type "application/wsdl+xml")
+                (equal content-type "text/xml"))
       (error "Server response is not an XML document"))
     (with-temp-buffer
       (mm-insert-part mime-part)
